@@ -1,9 +1,4 @@
-/**
- * AdminLTE Demo Menu
- * ------------------
- * You should not use this file in production.
- * This file is for demo purposes only.
- */
+
 (function ($, AdminLTE) {
 
     "use strict";
@@ -18,33 +13,19 @@
 
     setup();
 
-    /**
-    * Store a new settings in the browser
-    *
-    * @param String name Name of the setting
-    * @param String val Value of the setting
-    * @returns void
-    */
-    function store(name, val) {
-        if (typeof (Storage) !== "undefined") {
-          localStorage.setItem(name, val);
-        } else {
-          window.alert('Please use a modern browser to properly view this template!');
-        }
-    }
+    function getdata(){
 
-  /**
-   * Get a prestored setting
-   *
-   * @param String name Name of of the setting
-   * @returns String The value of the setting | null
-   */
-    function get(name) {
-        if (typeof (Storage) !== "undefined") {
-          return localStorage.getItem(name);
-        } else {
-          window.alert('Please use a modern browser to properly view this template!');
-        }
+        $.ajax({
+            url: 'http://10.189.156.52:4000/map',
+            dataType: 'json',
+            headers: { 'Access-Control-Allow-Origin': '*' },
+            success: function( data ){
+                setMarker(map, data);
+            },
+            error: function(xhr, status, error){
+                console.log(xhr.responseText);
+            }
+        });
     }
 
     function initMap() {
@@ -56,42 +37,45 @@
         }
         // Create a map object and specify the DOM element for display.
         map = new google.maps.Map(document.getElementById('areaMap'), mapOpt);
-        //loadData('data.json');
-        if(data){
-            setMarker(map, data);
-        } else{
-            var marker = new google.maps.Marker({
-                position: myLatLng,
+        getdata();
+        //if(data){
+        //    setMarker(map, data);
+        //} else{
+        //    var marker = new google.maps.Marker({
+        //        position: myLatLng,
+        //        map: map,
+        //        title: 'Name: '
+        //    });
+        //    marker.setIcon(iconColor.green);
+        //    marker.addListener('click', function(){
+        //        // TODO: generate data clicked region.
+        //        map.setZoom(8);
+        //        map.setCenter(marker.getPosition());
+        //    })
+        //    marker.setMap(map);
+        //}
+    }
+    function setMarker(map, data){
+        var marker = "";
+        var lat = "", lon = "", city = "";
+        for(var i = 0; i < data.length; i++) {
+            city = data[i]._id.city;
+            lat = data[i]._id.lat;
+            lon = data[i]._id.long;
+
+            marker = new google.maps.Marker({
                 map: map,
-                title: 'default location'
+                position: {lat:lat, lng:lon},
+                title: 'Name: ' + city
             });
+
+            //create_revenue(map, lat, lon, data[i].$revenue);
             marker.setIcon(iconColor.green);
             marker.addListener('click', function(){
                 // TODO: generate data clicked region.
                 map.setZoom(8);
                 map.setCenter(marker.getPosition());
-            })
-            marker.setMap(map);
-        }
-    }
-    function setMarker(map, data){
-        var marker = "";
-        var lat = "", lon = "", type = "";
-        for(var i = 0; i < data.length; i++) {
-            //s_type = data[i].type;
-            lat = data[i].latitude;
-            lon = data[i].longitude;
-
-            marker = new google.maps.Marker({
-                map: map,
-                position: {lat:lat, lng:lon},
-                title: 'id: ' + data[i].id + '\n'
-                + 'address: ' + data[i].address + '\n'
-                + 'revenue: ' + data[i].$revenue
             });
-
-            //create_revenue(map, lat, lon, data[i].$revenue);
-            marker.setIcon(iconColor.green);
             marker.setMap(map);
         }
     }
